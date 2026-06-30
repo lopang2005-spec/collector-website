@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+}
+
+/* Dark (default brand theme: near-black + gold) */
+[data-theme="dark"] {
+  --bg: #0c0c0d;
+  --surface: #17171a;
+  --text: #f2efe9;
+  --muted: #9a958c;
+  --accent: #c9a24b;
+  --border: #2a2a2d;
+}
+
+/* Light */
+[data-theme="light"] {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --text: #18181a;
+  --muted: #6b6b6b;
+  --accent: #a9802f;
+  --border: #e6e3dc;
+}
+
+/* Maroon */
+[data-theme="maroon"] {
+  --bg: #1a0a0d;
+  --surface: #2a1216;
+  --text: #f3e9e8;
+  --muted: #b08e8e;
+  --accent: #d4af37;
+  --border: #3d1a1f;
+}
+
+/* Light Blue */
+[data-theme="light-blue"] {
+  --bg: #f3f8fb;
+  --surface: #ffffff;
+  --text: #102a3a;
+  --muted: #5a7384;
+  --accent: #1f6f8b;
+  --border: #d9e7ee;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--bg);
+}
+
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+}
