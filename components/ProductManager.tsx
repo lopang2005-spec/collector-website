@@ -18,6 +18,7 @@ const EMPTY_FORM = {
   price: "",
   category: CATEGORIES[0],
   image_url: "" as string | null,
+  images: [] as string[],
   colors: [] as ProductColor[],
   sizes: [] as string[],
   availability: "in_stock" as "in_stock" | "by_order",
@@ -48,6 +49,7 @@ export default function ProductManager({
       price: String(p.price),
       category: p.category,
       image_url: p.image_url,
+      images: p.images?.length ? p.images : p.image_url ? [p.image_url] : [],
       colors: p.colors ?? [],
       sizes: p.sizes ?? [],
       availability: p.availability ?? "in_stock",
@@ -82,26 +84,49 @@ export default function ProductManager({
     setForm((f) => ({ ...f, sizes: f.sizes.filter((s) => s !== sz) }));
   }
 
-  async function handleImageUpload(file: File) {
+  async function handleImageUpload(files: FileList) {
     setUploading(true);
     setError(null);
 
-    const ext = file.name.split(".").pop();
-    const path = `${crypto.randomUUID()}.${ext}`;
+    const uploadedUrls: string[] = [];
 
-    const { error: uploadError } = await supabase.storage
-      .from("product-images")
-      .upload(path, file, { cacheControl: "3600", upsert: false });
+    for (const file of Array.from(files)) {
+      const ext = file.name.split(".").pop();
+      const path = `${crypto.randomUUID()}.${ext}`;
 
-    if (uploadError) {
-      setError("Image upload failed: " + uploadError.message);
-      setUploading(false);
-      return;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(path, file, { cacheControl: "3600", upsert: false });
+
+      if (uploadError) {
+        setError("Image upload failed: " + uploadError.message);
+        continue;
+      }
+
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+      uploadedUrls.push(data.publicUrl);
     }
 
-    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-    setForm((f) => ({ ...f, image_url: data.publicUrl }));
+    setForm((f) => {
+      const images = [...f.images, ...uploadedUrls];
+      return { ...f, images, image_url: f.image_url || images[0] || "" };
+    });
     setUploading(false);
+  }
+
+  function removeImage(url: string) {
+    setForm((f) => {
+      const images = f.images.filter((i) => i !== url);
+      return {
+        ...f,
+        images,
+        image_url: f.image_url === url ? images[0] ?? "" : f.image_url,
+      };
+    });
+  }
+
+  function makeMainImage(url: string) {
+    setForm((f) => ({ ...f, image_url: url }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -114,7 +139,8 @@ export default function ProductManager({
       description: form.description,
       price: Number(form.price),
       category: form.category,
-      image_url: form.image_url,
+      image_url: form.image_url || form.images[0] || null,
+      images: form.images,
       colors: form.colors,
       sizes: form.sizes,
       availability: form.availability,
@@ -376,25 +402,53 @@ export default function ProductManager({
           Leave empty if this product has no size options.
         </p>
 
-        <label className="mt-3 block text-sm text-muted">Image</label>
+        <label className="mt-3 block text-sm text-muted">Images</label>
         <input
           type="file"
           accept="image/*"
+          multiple
           onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleImageUpload(file);
+            const files = e.target.files;
+            if (files && files.length > 0) handleImageUpload(files);
+            e.target.value = "";
           }}
           className="mt-1 w-full text-sm"
         />
         {uploading && <p className="mt-1 text-sm text-muted">Uploading…</p>}
-        {form.image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={form.image_url}
-            alt="Preview"
-            className="mt-2 h-20 w-20 rounded object-cover"
-          />
+        {form.images.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {form.images.map((url) => (
+              <div key={url} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt="Product"
+                  onClick={() => makeMainImage(url)}
+                  className={
+                    "h-20 w-20 cursor-pointer rounded object-cover border-2 " +
+                    (form.image_url === url ? "border-accent" : "border-transparent")
+                  }
+                />
+                {form.image_url === url && (
+                  <span className="absolute -top-2 left-1 rounded bg-accent px-1 text-[10px] font-bold text-bg">
+                    Main
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeImage(url)}
+                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black text-xs text-white"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
         )}
+        <p className="mt-1 text-xs text-muted">
+          Select multiple photos at once, or add more over time. Tap a photo
+          to make it the main image shown on the shop page.
+        </p>
 
         {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
 

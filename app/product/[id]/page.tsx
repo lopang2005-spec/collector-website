@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase-server";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AddToCartButton from "@/components/AddToCartButton";
+import ProductGallery from "@/components/ProductGallery";
 import { notFound } from "next/navigation";
 
 export const revalidate = 0;
@@ -20,25 +21,19 @@ export default async function ProductPage({
 
   if (!product) notFound();
 
+  const galleryImages: string[] =
+    product.images?.length > 0
+      ? product.images
+      : product.image_url
+        ? [product.image_url]
+        : [];
+
   return (
     <>
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-10">
         <div className="grid gap-10 md:grid-cols-2">
-          <div className="card aspect-square overflow-hidden rounded-lg">
-            {product.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-muted">
-                No image
-              </div>
-            )}
-          </div>
+          <ProductGallery images={galleryImages} name={product.name} />
 
           <div>
             <p className="text-xs uppercase tracking-wide text-muted">
