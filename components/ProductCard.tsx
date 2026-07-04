@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export type ProductColor = { label: string; hex: string };
+
 export type Product = {
   id: string;
   name: string;
@@ -7,6 +9,9 @@ export type Product = {
   price: number;
   image_url: string | null;
   category: string;
+  colors: ProductColor[];
+  sizes: string[];
+  availability: "in_stock" | "by_order";
 };
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -30,9 +35,21 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
       </div>
       <div className="p-4">
-        <p className="text-xs uppercase tracking-wide text-muted">
-          {product.category}
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs uppercase tracking-wide text-muted">
+            {product.category}
+          </p>
+          <span
+            className={
+              "rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
+              (product.availability === "in_stock"
+                ? "border-accent bg-accent text-bg"
+                : "border-accent text-accent")
+            }
+          >
+            {product.availability === "in_stock" ? "Ready to Ship" : "By Order"}
+          </span>
+        </div>
         <h3 className="mt-1 font-display text-lg">{product.name}</h3>
         <p className="mt-2 text-accent">P{product.price.toFixed(2)}</p>
       </div>

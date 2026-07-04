@@ -37,44 +37,63 @@ export default function CartView({
         <h1 className="font-display text-3xl">Your cart</h1>
 
         <div className="mt-6 space-y-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="card flex items-center gap-4 rounded-lg p-4"
-            >
-              <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-bg">
-                {item.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    className="h-full w-full object-cover"
-                  />
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">{item.name}</p>
-                <p className="text-sm text-muted">
-                  P{item.price.toFixed(2)} each
-                </p>
-              </div>
-              <input
-                type="number"
-                min={1}
-                value={item.quantity}
-                onChange={(e) =>
-                  updateQuantity(item.id, Number(e.target.value))
-                }
-                className="w-16 rounded border border-border bg-surface px-2 py-1 text-center"
-              />
-              <button
-                onClick={() => removeItem(item.id)}
-                className="text-sm text-muted hover:text-text"
+          {items.map((item) => {
+            const variantParts = [
+              item.color,
+              item.size ? `Size ${item.size}` : null,
+            ].filter(Boolean);
+            return (
+              <div
+                key={`${item.id}-${item.color ?? ""}-${item.size ?? ""}`}
+                className="card flex items-center gap-4 rounded-lg p-4"
               >
-                Remove
-              </button>
-            </div>
-          ))}
+                <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-bg">
+                  {item.image_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">{item.name}</p>
+                  {variantParts.length > 0 && (
+                    <p className="text-xs text-muted">
+                      {variantParts.join(" · ")}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted">
+                    P{item.price.toFixed(2)} each —{" "}
+                    {item.availability === "by_order"
+                      ? "Available by order"
+                      : "Ready to ship"}
+                  </p>
+                </div>
+                <input
+                  type="number"
+                  min={1}
+                  value={item.quantity}
+                  onChange={(e) =>
+                    updateQuantity(
+                      item.id,
+                      item.color,
+                      item.size,
+                      Number(e.target.value)
+                    )
+                  }
+                  className="w-16 rounded border border-border bg-surface px-2 py-1 text-center"
+                />
+                <button
+                  onClick={() => removeItem(item.id, item.color, item.size)}
+                  className="text-sm text-muted hover:text-text"
+                >
+                  Remove
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mt-8 flex items-center justify-between border-t border-border pt-6">

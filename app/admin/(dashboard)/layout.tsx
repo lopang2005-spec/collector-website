@@ -17,6 +17,9 @@ export default function AdminLayout({
             <Link href="/admin/products" className="text-sm text-muted hover:text-text">
               Products
             </Link>
+            <Link href="/admin/orders" className="text-sm text-muted hover:text-text">
+              Orders
+            </Link>
             <Link href="/admin/settings" className="text-sm text-muted hover:text-text">
               Branding
             </Link>

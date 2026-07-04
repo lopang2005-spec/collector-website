@@ -31,6 +31,9 @@ export default async function Header() {
           <Link href="/" className="text-sm text-muted hover:text-text">
             Shop
           </Link>
+          <Link href="/track" className="text-sm text-muted hover:text-text">
+            Track Order
+          </Link>
           <ThemeSwitcher />
           <CartLink />
         </nav>

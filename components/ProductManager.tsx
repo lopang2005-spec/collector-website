@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import type { Product } from "@/components/ProductCard";
+import type { Product, ProductColor } from "@/components/ProductCard";
 
 const CATEGORIES = [
   "Streetwear",
@@ -18,6 +18,9 @@ const EMPTY_FORM = {
   price: "",
   category: CATEGORIES[0],
   image_url: "" as string | null,
+  colors: [] as ProductColor[],
+  sizes: [] as string[],
+  availability: "in_stock" as "in_stock" | "by_order",
 };
 
 export default function ProductManager({
@@ -30,6 +33,9 @@ export default function ProductManager({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newColorLabel, setNewColorLabel] = useState("");
+  const [newColorHex, setNewColorHex] = useState("#1a1a1a");
+  const [newSize, setNewSize] = useState("");
 
   const supabase = createClient();
   const isEditing = Boolean(form.id);
@@ -42,11 +48,38 @@ export default function ProductManager({
       price: String(p.price),
       category: p.category,
       image_url: p.image_url,
+      colors: p.colors ?? [],
+      sizes: p.sizes ?? [],
+      availability: p.availability ?? "in_stock",
     });
   }
 
   function resetForm() {
     setForm(EMPTY_FORM);
+  }
+
+  function addColor() {
+    if (!newColorLabel.trim()) return;
+    setForm((f) => ({
+      ...f,
+      colors: [...f.colors, { label: newColorLabel.trim(), hex: newColorHex }],
+    }));
+    setNewColorLabel("");
+  }
+
+  function removeColor(label: string) {
+    setForm((f) => ({ ...f, colors: f.colors.filter((c) => c.label !== label) }));
+  }
+
+  function addSize() {
+    const val = newSize.trim();
+    if (!val || form.sizes.includes(val)) return;
+    setForm((f) => ({ ...f, sizes: [...f.sizes, val] }));
+    setNewSize("");
+  }
+
+  function removeSize(sz: string) {
+    setForm((f) => ({ ...f, sizes: f.sizes.filter((s) => s !== sz) }));
   }
 
   async function handleImageUpload(file: File) {
@@ -82,6 +115,9 @@ export default function ProductManager({
       price: Number(form.price),
       category: form.category,
       image_url: form.image_url,
+      colors: form.colors,
+      sizes: form.sizes,
+      availability: form.availability,
     };
 
     if (isEditing) {
@@ -135,7 +171,7 @@ export default function ProductManager({
   }
 
   return (
-    <div className="mt-6 grid gap-8 md:grid-cols-[1fr_320px]">
+    <div className="mt-6 grid gap-8 md:grid-cols-[1fr_360px]">
       <div className="space-y-3">
         {products.length === 0 && (
           <p className="text-muted">No products yet.</p>
@@ -158,7 +194,8 @@ export default function ProductManager({
             <div className="flex-1">
               <p className="font-medium">{p.name}</p>
               <p className="text-sm text-muted">
-                {p.category} — P{Number(p.price).toFixed(2)}
+                {p.category} — P{Number(p.price).toFixed(2)} —{" "}
+                {p.availability === "in_stock" ? "Ready to ship" : "By order"}
               </p>
             </div>
             <button
@@ -225,6 +262,119 @@ export default function ProductManager({
             </option>
           ))}
         </select>
+
+        <label className="mt-3 block text-sm text-muted">Availability</label>
+        <div className="mt-1 space-y-2">
+          {[
+            { key: "in_stock", label: "Readily Available", sub: "In hand, ships immediately" },
+            { key: "by_order", label: "Available By Order", sub: "Sourced/made after order" },
+          ].map((opt) => (
+            <label
+              key={opt.key}
+              className={
+                "flex cursor-pointer items-start gap-3 rounded border p-3 " +
+                (form.availability === opt.key ? "border-accent" : "border-border")
+              }
+            >
+              <input
+                type="radio"
+                name="availability"
+                checked={form.availability === opt.key}
+                onChange={() =>
+                  setForm((f) => ({ ...f, availability: opt.key as "in_stock" | "by_order" }))
+                }
+                className="mt-1"
+              />
+              <span>
+                <span className="block text-sm font-medium">{opt.label}</span>
+                <span className="block text-xs text-muted">{opt.sub}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+
+        <label className="mt-3 block text-sm text-muted">Colors</label>
+        <div className="mt-1 flex flex-wrap gap-2">
+          {form.colors.map((c) => (
+            <span
+              key={c.label}
+              className="flex items-center gap-2 rounded-full border border-border px-3 py-1 text-sm"
+            >
+              <span
+                className="h-3.5 w-3.5 rounded-full border border-border"
+                style={{ backgroundColor: c.hex }}
+              />
+              {c.label}
+              <button
+                type="button"
+                onClick={() => removeColor(c.label)}
+                className="text-muted hover:text-text"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="mt-2 flex gap-2">
+          <input
+            type="color"
+            value={newColorHex}
+            onChange={(e) => setNewColorHex(e.target.value)}
+            className="h-9 w-12 rounded border border-border bg-surface"
+          />
+          <input
+            value={newColorLabel}
+            onChange={(e) => setNewColorLabel(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addColor())}
+            placeholder="e.g. Black"
+            className="flex-1 rounded border border-border bg-surface px-3 py-2"
+          />
+          <button
+            type="button"
+            onClick={addColor}
+            className="rounded border border-border px-3 py-2 text-sm"
+          >
+            Add
+          </button>
+        </div>
+
+        <label className="mt-3 block text-sm text-muted">Sizes</label>
+        <div className="mt-1 flex flex-wrap gap-2">
+          {form.sizes.map((sz) => (
+            <span
+              key={sz}
+              className="flex items-center gap-2 rounded-full border border-border px-3 py-1 text-sm"
+            >
+              {sz}
+              <button
+                type="button"
+                onClick={() => removeSize(sz)}
+                className="text-muted hover:text-text"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <div className="mt-2 flex gap-2">
+          <input
+            value={newSize}
+            onChange={(e) => setNewSize(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSize())}
+            placeholder="e.g. M or 42"
+            className="flex-1 rounded border border-border bg-surface px-3 py-2"
+          />
+          <button
+            type="button"
+            onClick={addSize}
+            className="rounded border border-border px-3 py-2 text-sm"
+          >
+            Add
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-muted">
+          Leave empty if this product has no size options.
+        </p>
 
         <label className="mt-3 block text-sm text-muted">Image</label>
         <input

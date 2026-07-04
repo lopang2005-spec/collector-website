@@ -14,19 +14,34 @@ export type CartItem = {
   price: number;
   image_url: string | null;
   quantity: number;
+  color: string | null;
+  size: string | null;
+  availability: "in_stock" | "by_order";
 };
 
 type CartContextType = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  removeItem: (id: string, color: string | null, size: string | null) => void;
+  updateQuantity: (
+    id: string,
+    color: string | null,
+    size: string | null,
+    quantity: number
+  ) => void;
   clearCart: () => void;
   total: number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 const STORAGE_KEY = "tc_cart_v1";
+
+function sameLine(
+  a: { id: string; color: string | null; size: string | null },
+  b: { id: string; color: string | null; size: string | null }
+) {
+  return a.id === b.id && a.color === b.color && a.size === b.size;
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -52,27 +67,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   function addItem(item: Omit<CartItem, "quantity">, quantity = 1) {
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
+      const existing = prev.find((i) => sameLine(i, item));
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i
+          sameLine(i, item) ? { ...i, quantity: i.quantity + quantity } : i
         );
       }
       return [...prev, { ...item, quantity }];
     });
   }
 
-  function removeItem(id: string) {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+  function removeItem(id: string, color: string | null, size: string | null) {
+    setItems((prev) => prev.filter((i) => !sameLine(i, { id, color, size })));
   }
 
-  function updateQuantity(id: string, quantity: number) {
+  function updateQuantity(
+    id: string,
+    color: string | null,
+    size: string | null,
+    quantity: number
+  ) {
     if (quantity <= 0) {
-      removeItem(id);
+      removeItem(id, color, size);
       return;
     }
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity } : i))
+      prev.map((i) =>
+        sameLine(i, { id, color, size }) ? { ...i, quantity } : i
+      )
     );
   }
 

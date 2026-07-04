@@ -1,5 +1,25 @@
 import type { CartItem } from "@/lib/cart-context";
 
+function itemLine(i: CartItem) {
+  const variantParts = [i.color, i.size ? `Size ${i.size}` : null].filter(
+    Boolean
+  );
+  const variant = variantParts.length ? ` (${variantParts.join(", ")})` : "";
+  const status =
+    i.availability === "by_order" ? "Available by order" : "Ready to ship";
+
+  const lines = [
+    `- ${i.name}${variant} x${i.quantity} — P${(i.price * i.quantity).toFixed(2)}`,
+    `  Status: ${status}`,
+  ];
+
+  if (i.image_url) {
+    lines.push(`  Photo: ${i.image_url}`);
+  }
+
+  return lines.join("\n");
+}
+
 export function buildWhatsAppOrderLink(
   whatsappNumber: string,
   items: CartItem[],
@@ -11,9 +31,7 @@ export function buildWhatsAppOrderLink(
     `Name: ${customerName || "(not provided)"}`,
     "",
     "Order:",
-    ...items.map(
-      (i) => `- ${i.name} x${i.quantity} — P${(i.price * i.quantity).toFixed(2)}`
-    ),
+    ...items.map((i) => itemLine(i)),
     "",
     `Total: P${total.toFixed(2)}`,
     "",
