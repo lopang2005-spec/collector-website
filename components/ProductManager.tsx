@@ -221,7 +221,7 @@ export default function ProductManager({
               <p className="font-medium">{p.name}</p>
               <p className="text-sm text-muted">
                 {p.category} — P{Number(p.price).toFixed(2)} —{" "}
-                {p.availability === "in_stock" ? "Ready to ship" : "By order"}
+                {p.availability === "in_stock" ? "Readily Available" : "By order"}
               </p>
             </div>
             <button

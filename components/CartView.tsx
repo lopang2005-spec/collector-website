@@ -68,7 +68,7 @@ export default function CartView({
                     P{item.price.toFixed(2)} each —{" "}
                     {item.availability === "by_order"
                       ? "Available by order"
-                      : "Ready to ship"}
+                      : "Readily Available"}
                   </p>
                 </div>
                 <input

@@ -6,7 +6,7 @@ function itemLine(i: CartItem) {
   );
   const variant = variantParts.length ? ` (${variantParts.join(", ")})` : "";
   const status =
-    i.availability === "by_order" ? "Available by order" : "Ready to ship";
+    i.availability === "by_order" ? "Available by order" : "Readily available";
 
   const lines = [
     `- ${i.name}${variant} x${i.quantity} — P${(i.price * i.quantity).toFixed(2)}`,

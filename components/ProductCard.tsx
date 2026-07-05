@@ -48,7 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 : "border-accent text-accent")
             }
           >
-            {product.availability === "in_stock" ? "Ready to Ship" : "By Order"}
+            {product.availability === "in_stock" ? "Readily Available" : "By Order"}
           </span>
         </div>
         <h3 className="mt-1 font-display text-lg">{product.name}</h3>

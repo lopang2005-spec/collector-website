@@ -45,7 +45,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
         }
       >
         {product.availability === "in_stock"
-          ? "Ready to Ship"
+          ? "Readily Available"
           : "Available By Order"}
       </span>
 
