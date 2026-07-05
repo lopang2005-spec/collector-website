@@ -1,32 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 export default function NavPanel() {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { items } = useCart();
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Open menu"
-        className="relative flex h-9 w-9 flex-col items-center justify-center gap-1.5"
-      >
-        <span className="h-0.5 w-6 bg-text" />
-        <span className="h-0.5 w-6 bg-text" />
-        <span className="h-0.5 w-6 bg-text" />
-        {count > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-bg">
-            {count}
-          </span>
-        )}
-      </button>
+  useEffect(() => setMounted(true), []);
 
+  const overlay = (
+    <>
       {/* Backdrop */}
       <div
         onClick={() => setOpen(false)}
@@ -92,6 +81,27 @@ export default function NavPanel() {
           </div>
         </nav>
       </div>
+    </>
+  );
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="Open menu"
+        className="relative flex h-9 w-9 flex-col items-center justify-center gap-1.5"
+      >
+        <span className="h-0.5 w-6 bg-text" />
+        <span className="h-0.5 w-6 bg-text" />
+        <span className="h-0.5 w-6 bg-text" />
+        {count > 0 && (
+          <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-bg">
+            {count}
+          </span>
+        )}
+      </button>
+
+      {mounted ? createPortal(overlay, document.body) : null}
     </>
   );
 }
