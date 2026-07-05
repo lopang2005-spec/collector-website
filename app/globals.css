@@ -25,14 +25,14 @@
   --border: #c5dde8;
 }
 
-/* Light Blue */
-[data-theme="light-blue"] {
-  --bg: #f3f8fb;
-  --surface: #ffffff;
-  --text: #102a3a;
-  --muted: #5a7384;
-  --accent: #1f6f8b;
-  --border: #d9e7ee;
+/* White */
+[data-theme="white"] {
+  --bg: #ffffff;
+  --surface: #f7f7f7;
+  --text: #111111;
+  --muted: #6b6b6b;
+  --accent: #c9a24b;
+  --border: #e2e2e2;
 }
 
 body {

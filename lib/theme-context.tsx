@@ -8,12 +8,12 @@ import {
   ReactNode,
 } from "react";
 
-export type Theme = "dark" | "baby-blue" | "light-blue";
+export type Theme = "dark" | "white" | "baby-blue";
 
 const THEMES: { value: Theme; label: string }[] = [
   { value: "dark", label: "Dark" },
+  { value: "white", label: "White" },
   { value: "baby-blue", label: "Baby Blue" },
-  { value: "light-blue", label: "Light Blue" },
 ];
 
 type ThemeContextType = {
