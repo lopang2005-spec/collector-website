@@ -15,24 +15,14 @@
   --border: #2a2a2d;
 }
 
-/* Light */
-[data-theme="light"] {
-  --bg: #fafaf8;
+/* Baby Blue (was Light) */
+[data-theme="baby-blue"] {
+  --bg: #e8f4f8;
   --surface: #ffffff;
-  --text: #18181a;
-  --muted: #6b6b6b;
-  --accent: #a9802f;
-  --border: #e6e3dc;
-}
-
-/* Maroon */
-[data-theme="maroon"] {
-  --bg: #1a0a0d;
-  --surface: #2a1216;
-  --text: #f3e9e8;
-  --muted: #b08e8e;
-  --accent: #d4af37;
-  --border: #3d1a1f;
+  --text: #0a2535;
+  --muted: #4a6a7a;
+  --accent: #1a6e8e;
+  --border: #c5dde8;
 }
 
 /* Light Blue */

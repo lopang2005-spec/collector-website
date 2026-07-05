@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/settings";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
-import CartLink from "@/components/CartLink";
+import NavPanel from "@/components/NavPanel";
 
 export default async function Header() {
   const settings = await getSiteSettings();
@@ -27,16 +26,7 @@ export default async function Header() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-5">
-          <Link href="/" className="text-sm text-muted hover:text-text">
-            Shop
-          </Link>
-          <Link href="/track" className="text-sm text-muted hover:text-text">
-            Track Order
-          </Link>
-          <ThemeSwitcher />
-          <CartLink />
-        </nav>
+        <NavPanel />
       </div>
     </header>
   );
