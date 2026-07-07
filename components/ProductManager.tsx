@@ -22,6 +22,7 @@ const EMPTY_FORM = {
   colors: [] as ProductColor[],
   sizes: [] as string[],
   availability: "in_stock" as "in_stock" | "by_order",
+  student_only: false,
 };
 
 export default function ProductManager({
@@ -53,6 +54,7 @@ export default function ProductManager({
       colors: p.colors ?? [],
       sizes: p.sizes ?? [],
       availability: p.availability ?? "in_stock",
+      student_only: p.student_only ?? false,
     });
   }
 
@@ -144,6 +146,7 @@ export default function ProductManager({
       colors: form.colors,
       sizes: form.sizes,
       availability: form.availability,
+      student_only: form.student_only,
     };
 
     if (isEditing) {
@@ -218,7 +221,14 @@ export default function ProductManager({
               )}
             </div>
             <div className="flex-1">
-              <p className="font-medium">{p.name}</p>
+              <p className="font-medium">
+                {p.name}
+                {p.student_only && (
+                  <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-bg">
+                    Student
+                  </span>
+                )}
+              </p>
               <p className="text-sm text-muted">
                 {p.category} — P{Number(p.price).toFixed(2)} —{" "}
                 {p.availability === "in_stock" ? "Readily Available" : "By order"}
@@ -318,6 +328,24 @@ export default function ProductManager({
             </label>
           ))}
         </div>
+
+        <label className="mt-3 flex cursor-pointer items-start gap-3 rounded border border-border p-3">
+          <input
+            type="checkbox"
+            checked={form.student_only}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, student_only: e.target.checked }))
+            }
+            className="mt-1"
+          />
+          <span>
+            <span className="block text-sm font-medium">Student-only item</span>
+            <span className="block text-xs text-muted">
+              Only shows in the student catalog, hidden from the main shop.
+              Verified students unlock it at /student.
+            </span>
+          </span>
+        </label>
 
         <label className="mt-3 block text-sm text-muted">Colors</label>
         <div className="mt-1 flex flex-wrap gap-2">

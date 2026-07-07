@@ -70,6 +70,13 @@ export default function NavPanel() {
           >
             Track Order
           </Link>
+          <Link
+            href="/student"
+            onClick={() => setOpen(false)}
+            className="rounded px-2 py-3 text-text hover:bg-bg"
+          >
+            Student Discounts
+          </Link>
 
           <div className="mt-4 border-t border-border pt-4">
             <p className="mb-2 px-2 text-xs uppercase tracking-wide text-muted">

@@ -13,6 +13,7 @@ export type Product = {
   colors: ProductColor[];
   sizes: string[];
   availability: "in_stock" | "by_order";
+  student_only?: boolean;
 };
 
 export default function ProductCard({ product }: { product: Product }) {

@@ -3,13 +3,19 @@
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 
-export default function SignOutButton() {
+export default function SignOutButton({
+  redirectTo = "/admin/login",
+  label = "Sign out",
+}: {
+  redirectTo?: string;
+  label?: string;
+}) {
   const router = useRouter();
 
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push(redirectTo);
     router.refresh();
   }
 
@@ -18,7 +24,7 @@ export default function SignOutButton() {
       onClick={handleSignOut}
       className="text-sm text-muted hover:text-text"
     >
-      Sign out
+      {label}
     </button>
   );
 }

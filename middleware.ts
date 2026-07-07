@@ -24,18 +24,46 @@ export async function middleware(request: NextRequest) {
 
   const { data } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname === "/admin/login";
-  const isAdminPath = request.nextUrl.pathname.startsWith("/admin");
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname === "/admin/login";
+  const isAdminPath = pathname.startsWith("/admin");
+  const isStudentCatalogPath = pathname.startsWith("/student/catalog");
 
-  if (isAdminPath && !isLoginPage && !data.user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
-    return NextResponse.redirect(url);
+  if (isAdminPath && !isLoginPage) {
+    if (!data.user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/login";
+      return NextResponse.redirect(url);
+    }
+
+    // Being logged in isn't enough — verified students are also "logged in"
+    // now, so this has to check the admin flag specifically.
+    const { data: isAdmin } = await supabase.rpc("is_admin");
+    if (!isAdmin) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin/login";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  if (isStudentCatalogPath) {
+    if (!data.user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/student";
+      return NextResponse.redirect(url);
+    }
+
+    const { data: isStudent } = await supabase.rpc("is_verified_student");
+    if (!isStudent) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/student";
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/student/catalog/:path*"],
 };
