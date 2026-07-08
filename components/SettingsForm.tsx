@@ -14,6 +14,12 @@ export default function SettingsForm({
   const [whatsapp, setWhatsapp] = useState(initialSettings.whatsapp_number);
   const [logoUrl, setLogoUrl] = useState(initialSettings.logo_url);
   const [logoPath, setLogoPath] = useState<string | null>(null);
+  const [heroLocation, setHeroLocation] = useState(initialSettings.hero_location);
+  const [heroHeadline, setHeroHeadline] = useState(initialSettings.hero_headline);
+  const [heroSubtitle, setHeroSubtitle] = useState(initialSettings.hero_subtitle);
+  const [heroButtonText, setHeroButtonText] = useState(
+    initialSettings.hero_button_text
+  );
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +73,10 @@ export default function SettingsForm({
         whatsapp_number: whatsapp,
         logo_url: logoUrl,
         logo_path: logoPath ?? previous?.logo_path ?? null,
+        hero_location: heroLocation,
+        hero_headline: heroHeadline,
+        hero_subtitle: heroSubtitle,
+        hero_button_text: heroButtonText,
       });
 
     if (updateError) {
@@ -118,6 +128,49 @@ export default function SettingsForm({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt="Logo preview" className="mt-3 h-16 w-16 rounded-full object-cover" />
       )}
+
+      <div className="mt-6 border-t border-border pt-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+          Homepage hero
+        </p>
+
+        <label className="mt-4 block text-sm text-muted">
+          Location line (shown above the headline)
+        </label>
+        <input
+          value={heroLocation}
+          onChange={(e) => setHeroLocation(e.target.value)}
+          placeholder="Palapye, Botswana"
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
+
+        <label className="mt-4 block text-sm text-muted">Headline</label>
+        <input
+          value={heroHeadline}
+          onChange={(e) => setHeroHeadline(e.target.value)}
+          placeholder="THE COLLECTOR"
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
+
+        <label className="mt-4 block text-sm text-muted">Subtitle</label>
+        <textarea
+          value={heroSubtitle}
+          onChange={(e) => setHeroSubtitle(e.target.value)}
+          rows={3}
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
+
+        <label className="mt-4 block text-sm text-muted">Button text</label>
+        <input
+          value={heroButtonText}
+          onChange={(e) => setHeroButtonText(e.target.value)}
+          placeholder="Shop New Arrivals"
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
+        <p className="mt-1 text-xs text-muted">
+          The button always scrolls down to the product grid — only the text is editable.
+        </p>
+      </div>
 
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
       {saved && (
