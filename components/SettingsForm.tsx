@@ -20,7 +20,10 @@ export default function SettingsForm({
   const [heroButtonText, setHeroButtonText] = useState(
     initialSettings.hero_button_text
   );
+  const [heroImageUrl, setHeroImageUrl] = useState(initialSettings.hero_image_url);
+  const [heroImagePath, setHeroImagePath] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingHero, setUploadingHero] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -51,17 +54,40 @@ export default function SettingsForm({
     setUploading(false);
   }
 
+  async function handleHeroImageUpload(file: File) {
+    setUploadingHero(true);
+    setError(null);
+
+    const ext = file.name.split(".").pop();
+    const path = `hero-${crypto.randomUUID()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("branding")
+      .upload(path, file, { cacheControl: "3600", upsert: false });
+
+    if (uploadError) {
+      setError("Hero image upload failed: " + uploadError.message);
+      setUploadingHero(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from("branding").getPublicUrl(path);
+    setHeroImageUrl(data.publicUrl);
+    setHeroImagePath(path);
+    setUploadingHero(false);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError(null);
     setSaved(false);
 
-    // Find the previous logo's storage path so we can remove it after saving,
-    // keeping the bucket from accumulating orphaned files.
+    // Find the previous logo/hero image storage paths so we can remove them
+    // after saving, keeping the bucket from accumulating orphaned files.
     const { data: previous } = await supabase
       .from("settings")
-      .select("logo_path")
+      .select("logo_path, hero_image_path")
       .eq("id", 1)
       .maybeSingle();
 
@@ -77,6 +103,8 @@ export default function SettingsForm({
         hero_headline: heroHeadline,
         hero_subtitle: heroSubtitle,
         hero_button_text: heroButtonText,
+        hero_image_url: heroImageUrl,
+        hero_image_path: heroImagePath ?? previous?.hero_image_path ?? null,
       });
 
     if (updateError) {
@@ -87,6 +115,13 @@ export default function SettingsForm({
 
     if (logoPath && previous?.logo_path && previous.logo_path !== logoPath) {
       await supabase.storage.from("branding").remove([previous.logo_path]);
+    }
+    if (
+      heroImagePath &&
+      previous?.hero_image_path &&
+      previous.hero_image_path !== heroImagePath
+    ) {
+      await supabase.storage.from("branding").remove([previous.hero_image_path]);
     }
 
     setSaving(false);
@@ -170,6 +205,43 @@ export default function SettingsForm({
         <p className="mt-1 text-xs text-muted">
           The button always scrolls down to the product grid — only the text is editable.
         </p>
+
+        <label className="mt-4 block text-sm text-muted">
+          Background image (optional)
+        </label>
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleHeroImageUpload(file);
+          }}
+          className="mt-1 w-full text-sm"
+        />
+        {uploadingHero && <p className="mt-1 text-sm text-muted">Uploading…</p>}
+        {heroImageUrl && (
+          <div className="mt-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={heroImageUrl}
+              alt="Hero background preview"
+              className="h-28 w-full rounded object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setHeroImageUrl(null);
+                setHeroImagePath(null);
+              }}
+              className="mt-2 text-xs text-muted underline hover:text-accent"
+            >
+              Remove background image
+            </button>
+          </div>
+        )}
+        <p className="mt-1 text-xs text-muted">
+          Leave empty for a plain dark hero. A wide, dark-toned photo works best.
+        </p>
       </div>
 
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
@@ -181,7 +253,7 @@ export default function SettingsForm({
 
       <button
         type="submit"
-        disabled={saving || uploading}
+        disabled={saving || uploading || uploadingHero}
         className="btn-primary mt-5 rounded px-4 py-2 font-medium disabled:opacity-60"
       >
         {saving ? "Saving…" : "Save changes"}

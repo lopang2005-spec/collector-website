@@ -8,6 +8,7 @@ export type SiteSettings = {
   hero_headline: string;
   hero_subtitle: string;
   hero_button_text: string;
+  hero_image_url: string | null;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -19,6 +20,7 @@ const DEFAULTS: SiteSettings = {
   hero_subtitle:
     "Curated streetwear, sneakers, accessories & watches — sourced, verified, and held to one standard.",
   hero_button_text: "Shop New Arrivals",
+  hero_image_url: null,
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -26,7 +28,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const { data } = await supabase
     .from("settings")
     .select(
-      "site_name, logo_url, whatsapp_number, hero_location, hero_headline, hero_subtitle, hero_button_text"
+      "site_name, logo_url, whatsapp_number, hero_location, hero_headline, hero_subtitle, hero_button_text, hero_image_url"
     )
     .eq("id", 1)
     .maybeSingle();
@@ -41,5 +43,6 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     hero_headline: data.hero_headline ?? DEFAULTS.hero_headline,
     hero_subtitle: data.hero_subtitle ?? DEFAULTS.hero_subtitle,
     hero_button_text: data.hero_button_text ?? DEFAULTS.hero_button_text,
+    hero_image_url: data.hero_image_url ?? null,
   };
 }

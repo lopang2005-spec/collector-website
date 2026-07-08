@@ -1,9 +1,18 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase-server";
 import { getSiteSettings } from "@/lib/settings";
 import NavPanel from "@/components/NavPanel";
+import SearchPanel from "@/components/SearchPanel";
 
 export default async function Header() {
-  const settings = await getSiteSettings();
+  const supabase = createClient();
+  const [settings, { data: products }] = await Promise.all([
+    getSiteSettings(),
+    supabase
+      .from("products")
+      .select("id, name, price, image_url, category")
+      .order("created_at", { ascending: false }),
+  ]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
@@ -26,7 +35,10 @@ export default async function Header() {
           </span>
         </Link>
 
-        <NavPanel />
+        <div className="flex items-center gap-1">
+          <SearchPanel products={products ?? []} />
+          <NavPanel />
+        </div>
       </div>
     </header>
   );

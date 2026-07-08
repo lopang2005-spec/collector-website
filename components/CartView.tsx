@@ -17,7 +17,7 @@ export default function CartView({
     return (
       <main className="mx-auto max-w-3xl px-4 py-16 text-center">
         <h1 className="font-display text-3xl">Your cart is empty</h1>
-        <Link href="/" className="mt-4 inline-block text-accent underline">
+        <Link href="/shop" className="mt-4 inline-block text-accent underline">
           Continue shopping
         </Link>
       </main>
