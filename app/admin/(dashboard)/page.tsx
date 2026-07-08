@@ -17,6 +17,12 @@ export default async function AdminHome() {
           Manage products
         </Link>
         <Link
+          href="/admin/categories"
+          className="rounded border border-border px-4 py-2"
+        >
+          Categories
+        </Link>
+        <Link
           href="/admin/settings"
           className="rounded border border-border px-4 py-2"
         >

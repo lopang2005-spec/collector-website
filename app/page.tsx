@@ -7,13 +7,23 @@ export const revalidate = 0;
 
 export default async function HomePage() {
   const supabase = createClient();
-  const { data: products } = await supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [{ data: products }, { data: categoryRows }] = await Promise.all([
+    supabase.from("products").select("*").order("created_at", { ascending: false }),
+    supabase.from("categories").select("name").order("created_at", { ascending: true }),
+  ]);
 
   const list = (products ?? []) as Product[];
-  const categories = Array.from(new Set(list.map((p) => p.category)));
+
+  // Show categories in the order they were created in /admin/categories,
+  // and only the ones that actually have a product in them right now.
+  const categoryNames = (categoryRows ?? []).map((c) => c.name);
+  const usedCategories = new Set(list.map((p) => p.category));
+  const categories = categoryNames.filter((c) => usedCategories.has(c));
+  // Fall back to any category on a product that (for some reason) isn't
+  // in the categories table yet, so nothing silently disappears.
+  for (const c of usedCategories) {
+    if (!categories.includes(c)) categories.push(c);
+  }
 
   return (
     <>

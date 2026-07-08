@@ -4,34 +4,31 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import type { Product, ProductColor } from "@/components/ProductCard";
 
-const CATEGORIES = [
-  "Streetwear",
-  "Sneakers",
-  "Accessories",
-  "Watches",
-];
-
-const EMPTY_FORM = {
-  id: "",
-  name: "",
-  description: "",
-  price: "",
-  category: CATEGORIES[0],
-  image_url: "" as string | null,
-  images: [] as string[],
-  colors: [] as ProductColor[],
-  sizes: [] as string[],
-  availability: "in_stock" as "in_stock" | "by_order",
-  student_only: false,
-};
+function makeEmptyForm(defaultCategory: string) {
+  return {
+    id: "",
+    name: "",
+    description: "",
+    price: "",
+    category: defaultCategory,
+    image_url: "" as string | null,
+    images: [] as string[],
+    colors: [] as ProductColor[],
+    sizes: [] as string[],
+    availability: "in_stock" as "in_stock" | "by_order",
+    student_only: false,
+  };
+}
 
 export default function ProductManager({
   initialProducts,
+  categories,
 }: {
   initialProducts: Product[];
+  categories: string[];
 }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(makeEmptyForm(categories[0] ?? ""));
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +56,7 @@ export default function ProductManager({
   }
 
   function resetForm() {
-    setForm(EMPTY_FORM);
+    setForm(makeEmptyForm(categories[0] ?? ""));
   }
 
   function addColor() {
@@ -285,19 +282,29 @@ export default function ProductManager({
         />
 
         <label className="mt-3 block text-sm text-muted">Category</label>
-        <select
-          value={form.category}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, category: e.target.value }))
-          }
-          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
-        >
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+        {categories.length > 0 ? (
+          <select
+            value={form.category}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, category: e.target.value }))
+            }
+            className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="mt-1 text-sm text-muted">
+            No categories yet —{" "}
+            <a href="/admin/categories" className="text-accent underline">
+              add one first
+            </a>
+            .
+          </p>
+        )}
 
         <label className="mt-3 block text-sm text-muted">Availability</label>
         <div className="mt-1 space-y-2">

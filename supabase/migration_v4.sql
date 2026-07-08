@@ -25,7 +25,7 @@ alter table admins enable row level security;
 -- function below. Add/remove admins directly in the SQL Editor.
 
 -- Add yourself as admin now (use the exact email you log into /admin with):
-insert into admins (email) values ('lopang2005@gmail.com')
+insert into admins (email) values ('YOUR-ADMIN-EMAIL@example.com')
 on conflict (email) do nothing;
 
 create or replace function is_admin()
