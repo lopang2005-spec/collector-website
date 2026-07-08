@@ -1,9 +1,5 @@
 import { getSiteSettings } from "@/lib/settings";
 
-const INSTAGRAM_URL =
-  "https://www.instagram.com/connoisseur.bw?igsh=MXZsb3lmaTQ4eG10dQ%3D%3D&utm_source=qr";
-const TIKTOK_URL = "https://www.tiktok.com/@the.collectors.ma?_r=1&_t=ZS-97q5p1h4CsX";
-
 export default async function Footer() {
   const settings = await getSiteSettings();
 
@@ -12,7 +8,7 @@ export default async function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 text-center text-sm text-muted">
         <div className="flex items-center gap-5">
           <a
-            href={INSTAGRAM_URL}
+            href={settings.instagram_url}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow The Collector on Instagram"
@@ -21,7 +17,7 @@ export default async function Footer() {
             <InstagramIcon />
           </a>
           <a
-            href={TIKTOK_URL}
+            href={settings.tiktok_url}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Follow The Collector on TikTok"
@@ -41,17 +37,6 @@ export default async function Footer() {
           Chat with us on WhatsApp
         </a>
 
-        <p>
-          {settings.site_name} —{" "}
-          <a
-            href={INSTAGRAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-accent"
-          >
-            @connoisseur.bw
-          </a>
-        </p>
         <p className="text-xs text-muted">
           © {new Date().getFullYear()} {settings.site_name}. All rights reserved.
         </p>

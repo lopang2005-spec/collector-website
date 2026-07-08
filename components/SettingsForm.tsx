@@ -22,6 +22,8 @@ export default function SettingsForm({
   );
   const [heroImageUrl, setHeroImageUrl] = useState(initialSettings.hero_image_url);
   const [heroImagePath, setHeroImagePath] = useState<string | null>(null);
+  const [instagramUrl, setInstagramUrl] = useState(initialSettings.instagram_url);
+  const [tiktokUrl, setTiktokUrl] = useState(initialSettings.tiktok_url);
   const [uploading, setUploading] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -105,6 +107,8 @@ export default function SettingsForm({
         hero_button_text: heroButtonText,
         hero_image_url: heroImageUrl,
         hero_image_path: heroImagePath ?? previous?.hero_image_path ?? null,
+        instagram_url: instagramUrl,
+        tiktok_url: tiktokUrl,
       });
 
     if (updateError) {
@@ -242,6 +246,28 @@ export default function SettingsForm({
         <p className="mt-1 text-xs text-muted">
           Leave empty for a plain dark hero. A wide, dark-toned photo works best.
         </p>
+      </div>
+
+      <div className="mt-6 border-t border-border pt-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+          Social links
+        </p>
+
+        <label className="mt-4 block text-sm text-muted">Instagram URL</label>
+        <input
+          value={instagramUrl}
+          onChange={(e) => setInstagramUrl(e.target.value)}
+          placeholder="https://www.instagram.com/yourhandle"
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
+
+        <label className="mt-4 block text-sm text-muted">TikTok URL</label>
+        <input
+          value={tiktokUrl}
+          onChange={(e) => setTiktokUrl(e.target.value)}
+          placeholder="https://www.tiktok.com/@yourhandle"
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
       </div>
 
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}

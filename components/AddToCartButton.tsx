@@ -36,18 +36,20 @@ export default function AddToCartButton({ product }: { product: Product }) {
 
   return (
     <div className="space-y-4">
-      <span
-        className={
-          "inline-block rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide " +
-          (product.availability === "in_stock"
-            ? "border-accent bg-accent text-bg"
-            : "border-accent text-accent")
-        }
-      >
-        {product.availability === "in_stock"
-          ? "Readily Available"
-          : "Available By Order"}
-      </span>
+      <div>
+        <span
+          className={
+            "inline-block rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide " +
+            (product.availability === "in_stock"
+              ? "border-accent bg-accent text-bg"
+              : "border-accent text-accent")
+          }
+        >
+          {product.availability === "in_stock"
+            ? "Readily Available"
+            : "Available By Order"}
+        </span>
+      </div>
 
       {product.colors?.length > 0 && (
         <div>
@@ -101,7 +103,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
 
       <button
         onClick={handleAdd}
-        className="btn-primary rounded px-6 py-3 font-medium transition hover:opacity-90"
+        className="btn-primary block w-full rounded px-6 py-3 font-medium transition hover:opacity-90 sm:w-auto"
       >
         {added ? "Added ✓" : "Add to cart"}
       </button>
