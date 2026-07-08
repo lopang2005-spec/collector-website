@@ -32,10 +32,10 @@ export default async function ProductPage({
     <>
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-10">
-        <div className="grid gap-10 md:grid-cols-2">
+        <div className="grid min-w-0 gap-10 md:grid-cols-2">
           <ProductGallery images={galleryImages} name={product.name} />
 
-          <div>
+          <div className="min-w-0">
             <p className="text-xs uppercase tracking-wide text-muted">
               {product.category}
             </p>

@@ -40,7 +40,7 @@ export default function ProductGallery({
   }
 
   return (
-    <div>
+    <div className="min-w-0">
       <div
         className="card relative aspect-square overflow-hidden rounded-lg select-none"
         onTouchStart={onTouchStart}
@@ -94,8 +94,11 @@ export default function ProductGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="relative mt-3">
-          <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="relative mt-3 min-w-0">
+          <div
+            className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            style={{ scrollSnapType: "x proximity" }}
+          >
             {images.map((url, i) => (
               <button
                 key={url}
@@ -105,6 +108,7 @@ export default function ProductGallery({
                   "h-16 w-16 flex-shrink-0 overflow-hidden rounded border-2 transition-colors " +
                   (active === i ? "border-accent" : "border-transparent")
                 }
+                style={{ scrollSnapAlign: "start" }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
