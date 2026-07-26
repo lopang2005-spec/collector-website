@@ -38,7 +38,7 @@ export default async function StudentCatalogPage() {
 
         <div className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
           {list.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} studentUnlocked />
           ))}
         </div>
       </main>

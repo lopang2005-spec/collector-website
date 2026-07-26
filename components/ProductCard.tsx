@@ -14,9 +14,20 @@ export type Product = {
   sizes: string[];
   availability: "in_stock" | "by_order";
   student_only?: boolean;
+  discount_amount?: number | null;
 };
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  studentUnlocked = false,
+}: {
+  product: Product;
+  studentUnlocked?: boolean;
+}) {
+  const hasDiscount = studentUnlocked && Number(product.discount_amount) > 0;
+  const finalPrice = hasDiscount
+    ? Number(product.price) - Number(product.discount_amount)
+    : Number(product.price);
   return (
     <Link
       href={`/product/${product.id}`}
@@ -53,7 +64,16 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         </div>
         <h3 className="mt-1 font-display text-lg">{product.name}</h3>
-        <p className="mt-2 text-accent">P{product.price.toFixed(2)}</p>
+        {hasDiscount ? (
+          <div className="mt-2 flex items-baseline gap-2">
+            <p className="text-muted line-through">
+              P{Number(product.price).toFixed(2)}
+            </p>
+            <p className="text-accent">P{finalPrice.toFixed(2)}</p>
+          </div>
+        ) : (
+          <p className="mt-2 text-accent">P{Number(product.price).toFixed(2)}</p>
+        )}
       </div>
     </Link>
   );

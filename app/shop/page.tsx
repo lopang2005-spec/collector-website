@@ -9,11 +9,13 @@ export const revalidate = 0;
 
 export default async function ShopPage() {
   const supabase = createClient();
-  const [{ data: products }, { data: categoryRows }, settings] = await Promise.all([
-    supabase.from("products").select("*").order("created_at", { ascending: false }),
-    supabase.from("categories").select("name").order("created_at", { ascending: true }),
-    getSiteSettings(),
-  ]);
+  const [{ data: products }, { data: categoryRows }, settings, { data: unlocked }] =
+    await Promise.all([
+      supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase.from("categories").select("name").order("created_at", { ascending: true }),
+      getSiteSettings(),
+      supabase.rpc("is_verified_student"),
+    ]);
 
   const list = (products ?? []) as Product[];
 
@@ -41,6 +43,7 @@ export default async function ShopPage() {
             products={list}
             categories={categories}
             whatsappNumber={settings.whatsapp_number}
+            studentUnlocked={Boolean(unlocked)}
           />
         )}
       </main>

@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/schools", label: "Schools" },
+  { href: "/admin/student-access", label: "Student Access" },
   { href: "/admin/suggestions", label: "Suggestions" },
   { href: "/admin/settings", label: "Branding" },
 ];

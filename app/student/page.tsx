@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import UnlockCodeForm from "@/components/UnlockCodeForm";
 
 export default function StudentVerifyPage() {
+  const [method, setMethod] = useState<"code" | "email">("code");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [stage, setStage] = useState<"email" | "code">("email");
@@ -73,10 +75,41 @@ export default function StudentVerifyPage() {
       <div className="card w-full max-w-sm rounded-lg p-6">
         <h1 className="font-display text-2xl">Student discount</h1>
         <p className="mt-2 text-sm text-muted">
-          Verify your school email to unlock the student-only catalog.
+          {method === "code"
+            ? "Enter your unlock code to reveal student pricing."
+            : "Verify your school email to unlock the student-only catalog."}
         </p>
 
-        {stage === "email" ? (
+        <div className="mt-4 flex gap-2 text-sm">
+          <button
+            type="button"
+            onClick={() => setMethod("code")}
+            className={
+              "rounded-full border px-3 py-1 " +
+              (method === "code"
+                ? "border-accent text-accent"
+                : "border-border text-muted")
+            }
+          >
+            I have a code
+          </button>
+          <button
+            type="button"
+            onClick={() => setMethod("email")}
+            className={
+              "rounded-full border px-3 py-1 " +
+              (method === "email"
+                ? "border-accent text-accent"
+                : "border-border text-muted")
+            }
+          >
+            I have a school email
+          </button>
+        </div>
+
+        {method === "code" ? (
+          <UnlockCodeForm />
+        ) : stage === "email" ? (
           <form onSubmit={handleSendCode}>
             <label className="mt-5 block text-sm text-muted">
               School email

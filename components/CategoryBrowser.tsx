@@ -9,10 +9,12 @@ export default function CategoryBrowser({
   products,
   categories,
   whatsappNumber,
+  studentUnlocked = false,
 }: {
   products: Product[];
   categories: string[];
   whatsappNumber: string;
+  studentUnlocked?: boolean;
 }) {
   const [active, setActive] = useState(NEW_IN);
 
@@ -75,7 +77,11 @@ export default function CategoryBrowser({
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
           {visible.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              studentUnlocked={studentUnlocked}
+            />
           ))}
         </div>
       )}

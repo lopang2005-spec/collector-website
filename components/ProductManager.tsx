@@ -17,6 +17,7 @@ function makeEmptyForm(defaultCategory: string) {
     sizes: [] as string[],
     availability: "in_stock" as "in_stock" | "by_order",
     student_only: false,
+    discount_amount: "" as string,
   };
 }
 
@@ -52,6 +53,8 @@ export default function ProductManager({
       sizes: p.sizes ?? [],
       availability: p.availability ?? "in_stock",
       student_only: p.student_only ?? false,
+      discount_amount:
+        p.discount_amount != null ? String(p.discount_amount) : "",
     });
   }
 
@@ -144,6 +147,10 @@ export default function ProductManager({
       sizes: form.sizes,
       availability: form.availability,
       student_only: form.student_only,
+      discount_amount:
+        form.discount_amount.trim() === ""
+          ? null
+          : Number(form.discount_amount),
     };
 
     if (isEditing) {
@@ -225,6 +232,11 @@ export default function ProductManager({
                     Student
                   </span>
                 )}
+                {Number(p.discount_amount) > 0 && (
+                  <span className="ml-2 rounded-full border border-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-accent">
+                    -P{Number(p.discount_amount).toFixed(2)}
+                  </span>
+                )}
               </p>
               <p className="text-sm text-muted">
                 {p.category} — P{Number(p.price).toFixed(2)} —{" "}
@@ -280,6 +292,25 @@ export default function ProductManager({
           onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
           className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
         />
+
+        <label className="mt-3 block text-sm text-muted">
+          Student discount (P off, optional)
+        </label>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          value={form.discount_amount}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, discount_amount: e.target.value }))
+          }
+          placeholder="Leave blank for no discount"
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
+        <p className="mt-1 text-xs text-muted">
+          Only shown to sessions that have unlocked student pricing at
+          /student — everyone else sees the regular price above.
+        </p>
 
         <label className="mt-3 block text-sm text-muted">Category</label>
         {categories.length > 0 ? (

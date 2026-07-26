@@ -4,7 +4,13 @@ import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import type { Product } from "@/components/ProductCard";
 
-export default function AddToCartButton({ product }: { product: Product }) {
+export default function AddToCartButton({
+  product,
+  effectivePrice,
+}: {
+  product: Product;
+  effectivePrice?: number;
+}) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(
@@ -24,7 +30,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
     addItem({
       id: product.id,
       name: product.name,
-      price: Number(product.price),
+      price: effectivePrice ?? Number(product.price),
       image_url: product.image_url,
       color: selectedColor,
       size: selectedSize,

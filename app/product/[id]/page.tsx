@@ -14,13 +14,17 @@ export default async function ProductPage({
   params: { id: string };
 }) {
   const supabase = createClient();
-  const { data: product } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", params.id)
-    .maybeSingle();
+  const [{ data: product }, { data: unlocked }] = await Promise.all([
+    supabase.from("products").select("*").eq("id", params.id).maybeSingle(),
+    supabase.rpc("is_verified_student"),
+  ]);
 
   if (!product) notFound();
+
+  const hasDiscount = Boolean(unlocked) && Number(product.discount_amount) > 0;
+  const finalPrice = hasDiscount
+    ? Number(product.price) - Number(product.discount_amount)
+    : Number(product.price);
 
   const galleryImages: string[] =
     product.images?.length > 0
@@ -49,13 +53,22 @@ export default async function ProductPage({
               {product.category}
             </p>
             <h1 className="mt-1 font-display text-3xl">{product.name}</h1>
-            <p className="mt-3 text-2xl text-accent">
-              P{Number(product.price).toFixed(2)}
-            </p>
+            {hasDiscount ? (
+              <div className="mt-3 flex items-baseline gap-3">
+                <p className="text-lg text-muted line-through">
+                  P{Number(product.price).toFixed(2)}
+                </p>
+                <p className="text-2xl text-accent">P{finalPrice.toFixed(2)}</p>
+              </div>
+            ) : (
+              <p className="mt-3 text-2xl text-accent">
+                P{Number(product.price).toFixed(2)}
+              </p>
+            )}
             <p className="mt-5 text-muted">{product.description}</p>
 
             <div className="mt-8">
-              <AddToCartButton product={product} />
+              <AddToCartButton product={product} effectivePrice={finalPrice} />
             </div>
           </div>
         </div>

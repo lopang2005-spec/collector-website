@@ -29,6 +29,9 @@ export default function AdminLayout({
             <Link href="/admin/schools" className="text-sm text-muted hover:text-text">
               Schools
             </Link>
+            <Link href="/admin/student-access" className="text-sm text-muted hover:text-text">
+              Student Access
+            </Link>
             <Link href="/admin/suggestions" className="text-sm text-muted hover:text-text">
               Suggestions
             </Link>
