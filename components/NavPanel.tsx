@@ -77,6 +77,13 @@ export default function NavPanel() {
           >
             Student Discounts
           </Link>
+          <Link
+            href="/suggestions"
+            onClick={() => setOpen(false)}
+            className="rounded px-2 py-3 text-text hover:bg-bg"
+          >
+            Suggestions
+          </Link>
 
           <div className="mt-4 border-t border-border pt-4">
             <p className="mb-2 px-2 text-xs uppercase tracking-wide text-muted">
