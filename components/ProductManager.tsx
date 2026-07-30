@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import type { Product, ProductColor } from "@/components/ProductCard";
 
@@ -36,9 +36,35 @@ export default function ProductManager({
   const [newColorLabel, setNewColorLabel] = useState("");
   const [newColorHex, setNewColorHex] = useState("#1a1a1a");
   const [newSize, setNewSize] = useState("");
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const supabase = createClient();
   const isEditing = Boolean(form.id);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return products.filter((p) => {
+      const matchesSearch = !q || p.name.toLowerCase().includes(q);
+      const matchesCategory =
+        categoryFilter === "All" || p.category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, search, categoryFilter]);
+
+  const grouped = useMemo(() => {
+    const groups: Record<string, Product[]> = {};
+    for (const p of filteredProducts) {
+      (groups[p.category] ??= []).push(p);
+    }
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredProducts]);
+
+  function toggleCollapsed(category: string) {
+    setCollapsed((c) => ({ ...c, [category]: !c[category] }));
+  }
 
   function startEdit(p: Product) {
     setForm({
@@ -55,6 +81,11 @@ export default function ProductManager({
       student_only: p.student_only ?? false,
       discount_amount:
         p.discount_amount != null ? String(p.discount_amount) : "",
+    });
+    // The form lives below the product list in the DOM on mobile, so jump
+    // straight to it instead of leaving the person to scroll and hunt.
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
 
@@ -205,61 +236,103 @@ export default function ProductManager({
 
   return (
     <div className="mt-6 grid gap-8 md:grid-cols-[1fr_360px]">
-      <div className="space-y-3">
+      <div className="space-y-4">
+        <div className="sticky top-0 z-10 space-y-2 bg-bg/95 py-2 backdrop-blur">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search products by name…"
+            className="w-full rounded border border-border bg-surface px-3 py-2"
+          />
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="w-full rounded border border-border bg-surface px-3 py-2"
+          >
+            <option value="All">All categories ({products.length})</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c} ({products.filter((p) => p.category === c).length})
+              </option>
+            ))}
+          </select>
+        </div>
+
         {products.length === 0 && (
           <p className="text-muted">No products yet.</p>
         )}
-        {products.map((p) => (
-          <div
-            key={p.id}
-            className="card flex items-center gap-4 rounded-lg p-3"
-          >
-            <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded bg-bg">
-              {p.image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={p.image_url}
-                  alt={p.name}
-                  className="h-full w-full object-cover"
-                />
-              )}
-            </div>
-            <div className="flex-1">
-              <p className="font-medium">
-                {p.name}
-                {p.student_only && (
-                  <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-bg">
-                    Student
-                  </span>
-                )}
-                {Number(p.discount_amount) > 0 && (
-                  <span className="ml-2 rounded-full border border-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-accent">
-                    -P{Number(p.discount_amount).toFixed(2)}
-                  </span>
-                )}
-              </p>
-              <p className="text-sm text-muted">
-                {p.category} — P{Number(p.price).toFixed(2)} —{" "}
-                {p.availability === "in_stock" ? "Readily Available" : "By order"}
-              </p>
-            </div>
+        {products.length > 0 && filteredProducts.length === 0 && (
+          <p className="text-muted">No products match that search.</p>
+        )}
+
+        {grouped.map(([category, items]) => (
+          <div key={category} className="space-y-3">
             <button
-              onClick={() => startEdit(p)}
-              className="text-sm text-accent"
+              type="button"
+              onClick={() => toggleCollapsed(category)}
+              className="flex w-full items-center justify-between border-b border-border pb-1 text-left"
             >
-              Edit
+              <h3 className="font-display text-sm uppercase tracking-wide text-muted">
+                {category} ({items.length})
+              </h3>
+              <span className="text-muted">
+                {collapsed[category] ? "+" : "–"}
+              </span>
             </button>
-            <button
-              onClick={() => handleDelete(p.id)}
-              className="text-sm text-red-400"
-            >
-              Remove
-            </button>
+            {!collapsed[category] &&
+              items.map((p) => (
+                <div
+                  key={p.id}
+                  className="card flex items-center gap-4 rounded-lg p-3"
+                >
+                  <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded bg-bg">
+                    {p.image_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={p.image_url}
+                        alt={p.name}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {p.name}
+                      {p.student_only && (
+                        <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-bg">
+                          Student
+                        </span>
+                      )}
+                      {Number(p.discount_amount) > 0 && (
+                        <span className="ml-2 rounded-full border border-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-accent">
+                          -P{Number(p.discount_amount).toFixed(2)}
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-muted">
+                      P{Number(p.price).toFixed(2)} —{" "}
+                      {p.availability === "in_stock" ? "Readily Available" : "By order"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => startEdit(p)}
+                    className="text-sm text-accent"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="text-sm text-red-400"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="card h-fit rounded-lg p-5">
+      <form ref={formRef} onSubmit={handleSubmit} className="card h-fit rounded-lg p-5">
         <h2 className="font-display text-lg">
           {isEditing ? "Edit product" : "Add product"}
         </h2>

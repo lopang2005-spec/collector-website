@@ -3,11 +3,12 @@
 
 export const ORDER_STAGES = [
   { key: "placed", label: "Order Placed" },
-  { key: "sourcing", label: "Sourcing / Packing" },
+  { key: "sourcing", label: "Packing" },
   { key: "export", label: "China Export Declaration" },
   { key: "transit", label: "In Transit to Botswana" },
   { key: "arrived", label: "Arrived in Botswana" },
   { key: "out_for_delivery", label: "Out for Delivery" },
+  { key: "ready_for_pickup", label: "Ready for Pickup" },
   { key: "delivered", label: "Delivered" },
 ] as const;
 

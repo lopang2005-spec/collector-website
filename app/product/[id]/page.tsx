@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AddToCartButton from "@/components/AddToCartButton";
 import ProductGallery from "@/components/ProductGallery";
-import Link from "next/link";
+import BackToShopLink from "@/components/BackToShopLink";
 import { notFound } from "next/navigation";
 
 export const revalidate = 0;
@@ -37,13 +37,7 @@ export default async function ProductPage({
     <>
       <Header />
       <main className="mx-auto max-w-5xl px-4 py-10">
-        <Link
-          href="/shop"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-accent"
-        >
-          <BackArrowIcon />
-          Back to Shop
-        </Link>
+        <BackToShopLink />
 
         <div className="grid min-w-0 gap-10 md:grid-cols-2">
           <ProductGallery images={galleryImages} name={product.name} />
@@ -78,10 +72,4 @@ export default async function ProductPage({
   );
 }
 
-function BackArrowIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
-  );
-}
+
