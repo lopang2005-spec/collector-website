@@ -5,11 +5,19 @@ import { useRef, useState } from "react";
 export default function ProductGallery({
   images,
   name,
+  activeIndex,
+  onActiveChange,
 }: {
   images: string[];
   name: string;
+  /** Optional: control the active image from a parent (e.g. to share the
+   *  "selected photo" with the add-to-cart button). Falls back to internal
+   *  state if not provided. */
+  activeIndex?: number;
+  onActiveChange?: (index: number) => void;
 }) {
-  const [active, setActive] = useState(0);
+  const [internalActive, setInternalActive] = useState(0);
+  const active = activeIndex ?? internalActive;
   const touchStartX = useRef<number | null>(null);
 
   if (images.length === 0) {
@@ -23,7 +31,9 @@ export default function ProductGallery({
   }
 
   function goTo(i: number) {
-    setActive(Math.max(0, Math.min(images.length - 1, i)));
+    const clamped = Math.max(0, Math.min(images.length - 1, i));
+    setInternalActive(clamped);
+    onActiveChange?.(clamped);
   }
 
   function onTouchStart(e: React.TouchEvent) {

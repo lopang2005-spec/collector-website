@@ -7,9 +7,13 @@ import type { Product } from "@/components/ProductCard";
 export default function AddToCartButton({
   product,
   effectivePrice,
+  selectedImageUrl,
 }: {
   product: Product;
   effectivePrice?: number;
+  /** The photo the customer picked in the gallery, if any. Falls back to
+   *  the product's cover image. */
+  selectedImageUrl?: string | null;
 }) {
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
@@ -31,7 +35,7 @@ export default function AddToCartButton({
       id: product.id,
       name: product.name,
       price: effectivePrice ?? Number(product.price),
-      image_url: product.image_url,
+      image_url: selectedImageUrl ?? product.image_url,
       color: selectedColor,
       size: selectedSize,
       availability: product.availability,
