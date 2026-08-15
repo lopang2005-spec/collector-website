@@ -11,6 +11,7 @@ export default async function Header() {
     supabase
       .from("products")
       .select("id, name, price, image_url, category")
+      .eq("is_hidden", false)
       .order("created_at", { ascending: false }),
   ]);
 

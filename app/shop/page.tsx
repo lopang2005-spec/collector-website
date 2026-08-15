@@ -11,7 +11,11 @@ export default async function ShopPage() {
   const supabase = createClient();
   const [{ data: products }, { data: categoryRows }, settings, { data: unlocked }] =
     await Promise.all([
-      supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase
+        .from("products")
+        .select("*")
+        .eq("is_hidden", false)
+        .order("created_at", { ascending: false }),
       supabase.from("categories").select("name").order("created_at", { ascending: true }),
       getSiteSettings(),
       supabase.rpc("is_verified_student"),

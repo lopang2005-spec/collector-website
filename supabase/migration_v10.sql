@@ -1,16 +1,13 @@
 -- migration_v10.sql
 -- Run this in Supabase: Project > SQL Editor > New query > paste all > Run
+-- Safe to run once on top of everything before it (through migration_v9.sql).
 
--- Adds the new "ready_for_pickup" stage (inserted after "out_for_delivery")
--- to the orders.current_stage check constraint. Keep in sync with
--- lib/orderStages.ts.
--- Note: the "sourcing" key still exists as-is — its label just changed
--- from "Sourcing / Packing" to "Packing" in the app, so no DB change is
--- needed for that part.
+-- ── CONTEXT ──────────────────────────────────────────────────────────────
+-- Adds a per-product "hidden" flag so you can pull a product out of the
+-- shop without deleting it, e.g. when a supplier is temporarily out of
+-- stock. Hidden products stay in the admin panel (with a "Hidden" badge
+-- and a one-click Unhide button) but disappear from the shop grid, the
+-- student catalog, header search, and their own product page (direct link
+-- 404s instead of showing a page customers could still order from).
 
-alter table orders drop constraint if exists orders_stage_check;
-alter table orders add constraint orders_stage_check
-  check (current_stage in (
-    'placed', 'sourcing', 'export', 'transit', 'arrived',
-    'out_for_delivery', 'ready_for_pickup', 'delivered'
-  ));
+alter table products add column if not exists is_hidden boolean not null default false;

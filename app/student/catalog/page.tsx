@@ -12,6 +12,7 @@ export default async function StudentCatalogPage() {
     .from("products")
     .select("*")
     .eq("student_only", true)
+    .eq("is_hidden", false)
     .order("created_at", { ascending: false });
 
   const list = (products ?? []) as Product[];

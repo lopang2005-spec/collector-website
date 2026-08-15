@@ -15,6 +15,7 @@ export type Product = {
   availability: "in_stock" | "by_order";
   student_only?: boolean;
   discount_amount?: number | null;
+  is_hidden?: boolean;
 };
 
 export default function ProductCard({
@@ -49,12 +50,12 @@ export default function ProductCard({
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs uppercase tracking-wide text-muted">
+          <p className="min-w-0 flex-1 truncate text-xs uppercase tracking-wide text-muted">
             {product.category}
           </p>
           <span
             className={
-              "rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
+              "shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
               (product.availability === "in_stock"
                 ? "border-accent bg-accent text-bg"
                 : "border-accent text-accent")

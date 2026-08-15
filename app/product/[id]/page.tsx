@@ -18,7 +18,7 @@ export default async function ProductPage({
     supabase.rpc("is_verified_student"),
   ]);
 
-  if (!product) notFound();
+  if (!product || product.is_hidden) notFound();
 
   const hasDiscount = Boolean(unlocked) && Number(product.discount_amount) > 0;
   const finalPrice = hasDiscount

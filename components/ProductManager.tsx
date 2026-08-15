@@ -203,6 +203,26 @@ export default function ProductManager({
     setProducts((prev) => prev.filter((p) => p.id !== id));
   }
 
+  async function handleToggleHidden(p: Product) {
+    const nextHidden = !p.is_hidden;
+    const { data, error: updateError } = await supabase
+      .from("products")
+      .update({ is_hidden: nextHidden })
+      .eq("id", p.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    if (data) {
+      setProducts((prev) =>
+        prev.map((row) => (row.id === data.id ? (data as Product) : row))
+      );
+    }
+  }
+
   return (
     <div className="mt-6 grid gap-8 md:grid-cols-[1fr_360px]">
       <div className="space-y-3">
@@ -212,7 +232,10 @@ export default function ProductManager({
         {products.map((p) => (
           <div
             key={p.id}
-            className="card flex items-center gap-4 rounded-lg p-3"
+            className={
+              "card flex items-center gap-4 rounded-lg p-3 " +
+              (p.is_hidden ? "opacity-50" : "")
+            }
           >
             <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded bg-bg">
               {p.image_url && (
@@ -227,6 +250,11 @@ export default function ProductManager({
             <div className="flex-1">
               <p className="font-medium">
                 {p.name}
+                {p.is_hidden && (
+                  <span className="ml-2 rounded-full border border-red-400 px-2 py-0.5 text-[10px] font-semibold uppercase text-red-400">
+                    Hidden
+                  </span>
+                )}
                 {p.student_only && (
                   <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-bg">
                     Student
@@ -243,6 +271,12 @@ export default function ProductManager({
                 {p.availability === "in_stock" ? "Readily Available" : "By order"}
               </p>
             </div>
+            <button
+              onClick={() => handleToggleHidden(p)}
+              className="text-sm text-muted hover:text-text"
+            >
+              {p.is_hidden ? "Unhide" : "Hide"}
+            </button>
             <button
               onClick={() => startEdit(p)}
               className="text-sm text-accent"
