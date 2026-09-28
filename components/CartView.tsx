@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { buildWhatsAppOrderLink } from "@/lib/whatsapp";
+import { calcDeposit } from "@/lib/deposit";
 import Link from "next/link";
 
 export default function CartView({
   whatsappNumber,
+  depositPercent,
 }: {
   whatsappNumber: string;
+  depositPercent: number;
 }) {
   const { items, removeItem, updateQuantity, total } = useCart();
   const [name, setName] = useState("");
@@ -24,11 +27,16 @@ export default function CartView({
     );
   }
 
+  const { deposit, balance, percent } = calcDeposit(total, depositPercent);
+
   const whatsappLink = buildWhatsAppOrderLink(
     whatsappNumber,
     items,
     total,
-    name
+    name,
+    deposit,
+    balance,
+    percent
   );
 
   return (
@@ -39,12 +47,13 @@ export default function CartView({
         <div className="mt-6 space-y-4">
           {items.map((item) => {
             const variantParts = [
+              item.option,
               item.color,
               item.size ? `Size ${item.size}` : null,
             ].filter(Boolean);
             return (
               <div
-                key={`${item.id}-${item.color ?? ""}-${item.size ?? ""}`}
+                key={`${item.id}-${item.option ?? ""}-${item.color ?? ""}-${item.size ?? ""}`}
                 className="card flex items-center gap-4 rounded-lg p-4"
               >
                 <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-bg">
@@ -80,13 +89,16 @@ export default function CartView({
                       item.id,
                       item.color,
                       item.size,
+                      item.option ?? null,
                       Number(e.target.value)
                     )
                   }
                   className="w-16 rounded border border-border bg-surface px-2 py-1 text-center"
                 />
                 <button
-                  onClick={() => removeItem(item.id, item.color, item.size)}
+                  onClick={() =>
+                    removeItem(item.id, item.color, item.size, item.option ?? null)
+                  }
                   className="text-sm text-muted hover:text-text"
                 >
                   Remove
@@ -99,6 +111,21 @@ export default function CartView({
         <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
           <span className="text-lg">Total</span>
           <span className="text-xl text-accent">P{total.toFixed(2)}</span>
+        </div>
+
+        <div className="mt-4 card rounded-lg p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted">
+              Deposit to make your order ({percent}%)
+            </span>
+            <span className="text-lg font-semibold text-accent">
+              P{deposit.toFixed(2)}
+            </span>
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <span className="text-sm text-muted">Balance due later</span>
+            <span className="text-sm">P{balance.toFixed(2)}</span>
+          </div>
         </div>
 
         <div className="mt-8 card rounded-lg p-5">

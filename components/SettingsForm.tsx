@@ -24,6 +24,9 @@ export default function SettingsForm({
   const [heroImagePath, setHeroImagePath] = useState<string | null>(null);
   const [instagramUrl, setInstagramUrl] = useState(initialSettings.instagram_url);
   const [tiktokUrl, setTiktokUrl] = useState(initialSettings.tiktok_url);
+  const [depositPercent, setDepositPercent] = useState(
+    String(initialSettings.deposit_percent)
+  );
   const [uploading, setUploading] = useState(false);
   const [uploadingHero, setUploadingHero] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -81,9 +84,20 @@ export default function SettingsForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setError(null);
     setSaved(false);
+
+    const depositNum = Number(depositPercent);
+    if (
+      depositPercent.trim() === "" ||
+      Number.isNaN(depositNum) ||
+      depositNum < 0 ||
+      depositNum > 100
+    ) {
+      setError("Deposit must be a number between 0 and 100.");
+      return;
+    }
+    setSaving(true);
 
     // Find the previous logo/hero image storage paths so we can remove them
     // after saving, keeping the bucket from accumulating orphaned files.
@@ -109,6 +123,7 @@ export default function SettingsForm({
         hero_image_path: heroImagePath ?? previous?.hero_image_path ?? null,
         instagram_url: instagramUrl,
         tiktok_url: tiktokUrl,
+        deposit_percent: depositNum,
       });
 
     if (updateError) {
@@ -268,6 +283,29 @@ export default function SettingsForm({
           placeholder="https://www.tiktok.com/@yourhandle"
           className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
         />
+      </div>
+
+      <div className="mt-6 border-t border-border pt-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+          Checkout
+        </p>
+
+        <label className="mt-4 block text-sm text-muted">
+          Deposit percentage (0 to 100)
+        </label>
+        <input
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          value={depositPercent}
+          onChange={(e) => setDepositPercent(e.target.value)}
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+        />
+        <p className="mt-1 text-xs text-muted">
+          Customers see this share of their total as the deposit on the cart
+          page, rounded up to the next whole Pula.
+        </p>
       </div>
 
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}

@@ -11,6 +11,7 @@ export type SiteSettings = {
   hero_image_url: string | null;
   instagram_url: string;
   tiktok_url: string;
+  deposit_percent: number;
 };
 
 const DEFAULTS: SiteSettings = {
@@ -26,6 +27,7 @@ const DEFAULTS: SiteSettings = {
   instagram_url:
     "https://www.instagram.com/connoisseur.bw?igsh=MXZsb3lmaTQ4eG10dQ%3D%3D&utm_source=qr",
   tiktok_url: "https://www.tiktok.com/@the.collectors.ma?_r=1&_t=ZS-97q5p1h4CsX",
+  deposit_percent: 60,
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -33,7 +35,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   const { data } = await supabase
     .from("settings")
     .select(
-      "site_name, logo_url, whatsapp_number, hero_location, hero_headline, hero_subtitle, hero_button_text, hero_image_url, instagram_url, tiktok_url"
+      "site_name, logo_url, whatsapp_number, hero_location, hero_headline, hero_subtitle, hero_button_text, hero_image_url, instagram_url, tiktok_url, deposit_percent"
     )
     .eq("id", 1)
     .maybeSingle();
@@ -51,5 +53,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     hero_image_url: data.hero_image_url ?? null,
     instagram_url: data.instagram_url ?? DEFAULTS.instagram_url,
     tiktok_url: data.tiktok_url ?? DEFAULTS.tiktok_url,
+    deposit_percent:
+      data.deposit_percent != null
+        ? Number(data.deposit_percent)
+        : DEFAULTS.deposit_percent,
   };
 }

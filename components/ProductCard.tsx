@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 export type ProductColor = { label: string; hex: string };
+export type PriceOption = { label: string; price: number };
 
 export type Product = {
   id: string;
@@ -15,7 +16,7 @@ export type Product = {
   availability: "in_stock" | "by_order";
   student_only?: boolean;
   discount_amount?: number | null;
-  is_hidden?: boolean;
+  price_options?: PriceOption[] | null;
 };
 
 export default function ProductCard({
@@ -26,9 +27,16 @@ export default function ProductCard({
   studentUnlocked?: boolean;
 }) {
   const hasDiscount = studentUnlocked && Number(product.discount_amount) > 0;
-  const finalPrice = hasDiscount
-    ? Number(product.price) - Number(product.discount_amount)
+  const options = product.price_options ?? [];
+  const hasOptions = options.length > 1;
+  // With options, the card shows the cheapest one as "From P…".
+  const basePrice = hasOptions
+    ? Math.min(...options.map((o) => Number(o.price)))
     : Number(product.price);
+  const finalPrice = hasDiscount
+    ? Math.max(0, basePrice - Number(product.discount_amount))
+    : basePrice;
+  const prefix = hasOptions ? "From " : "";
   return (
     <Link
       href={`/product/${product.id}`}
@@ -50,12 +58,12 @@ export default function ProductCard({
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="min-w-0 flex-1 truncate text-xs uppercase tracking-wide text-muted">
+          <p className="text-xs uppercase tracking-wide text-muted">
             {product.category}
           </p>
           <span
             className={
-              "shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
+              "rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " +
               (product.availability === "in_stock"
                 ? "border-accent bg-accent text-bg"
                 : "border-accent text-accent")
@@ -68,12 +76,16 @@ export default function ProductCard({
         {hasDiscount ? (
           <div className="mt-2 flex items-baseline gap-2">
             <p className="text-muted line-through">
-              P{Number(product.price).toFixed(2)}
+              P{basePrice.toFixed(2)}
             </p>
-            <p className="text-accent">P{finalPrice.toFixed(2)}</p>
+            <p className="text-accent">
+              {prefix}P{finalPrice.toFixed(2)}
+            </p>
           </div>
         ) : (
-          <p className="mt-2 text-accent">P{Number(product.price).toFixed(2)}</p>
+          <p className="mt-2 text-accent">
+            {prefix}P{basePrice.toFixed(2)}
+          </p>
         )}
       </div>
     </Link>

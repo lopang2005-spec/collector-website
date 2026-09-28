@@ -18,12 +18,10 @@ export default async function ProductPage({
     supabase.rpc("is_verified_student"),
   ]);
 
-  if (!product || product.is_hidden) notFound();
+  if (!product) notFound();
 
   const hasDiscount = Boolean(unlocked) && Number(product.discount_amount) > 0;
-  const finalPrice = hasDiscount
-    ? Number(product.price) - Number(product.discount_amount)
-    : Number(product.price);
+  const discountAmount = hasDiscount ? Number(product.discount_amount) : 0;
 
   const galleryImages: string[] =
     product.images?.length > 0
@@ -46,7 +44,7 @@ export default async function ProductPage({
 
         <ProductPurchasePanel
           product={product}
-          effectivePrice={finalPrice}
+          discountAmount={discountAmount}
           galleryImages={galleryImages}
         />
       </main>

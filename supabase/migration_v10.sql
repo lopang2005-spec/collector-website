@@ -1,13 +1,18 @@
 -- migration_v10.sql
 -- Run this in Supabase: Project > SQL Editor > New query > paste all > Run
 -- Safe to run once on top of everything before it (through migration_v9.sql).
+-- Run it BEFORE deploying v18.
 
--- ── CONTEXT ──────────────────────────────────────────────────────────────
--- Adds a per-product "hidden" flag so you can pull a product out of the
--- shop without deleting it, e.g. when a supplier is temporarily out of
--- stock. Hidden products stay in the admin panel (with a "Hidden" badge
--- and a one-click Unhide button) but disappear from the shop grid, the
--- student catalog, header search, and their own product page (direct link
--- 404s instead of showing a page customers could still order from).
+-- Multiple price options per product (e.g. watch: Basic box / Premium box).
+-- Format: [{"label": "Basic box", "price": 1200}, {"label": "Premium box", "price": 1800}]
+-- Empty array = product uses its normal single price.
+alter table products
+  add column if not exists price_options jsonb not null default '[]';
 
-alter table products add column if not exists is_hidden boolean not null default false;
+-- Deposit percentage shown at checkout, editable in /admin/settings.
+alter table settings
+  add column if not exists deposit_percent numeric(5,2) not null default 60;
+
+alter table settings drop constraint if exists settings_deposit_percent_check;
+alter table settings add constraint settings_deposit_percent_check
+  check (deposit_percent >= 0 and deposit_percent <= 100);

@@ -16,17 +16,25 @@ export type CartItem = {
   quantity: number;
   color: string | null;
   size: string | null;
+  /** Label of the chosen price option (e.g. "Premium box"), or null. */
+  option: string | null;
   availability: "in_stock" | "by_order";
 };
 
 type CartContextType = {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (id: string, color: string | null, size: string | null) => void;
+  removeItem: (
+    id: string,
+    color: string | null,
+    size: string | null,
+    option: string | null
+  ) => void;
   updateQuantity: (
     id: string,
     color: string | null,
     size: string | null,
+    option: string | null,
     quantity: number
   ) => void;
   clearCart: () => void;
@@ -36,11 +44,21 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 const STORAGE_KEY = "tc_cart_v1";
 
-function sameLine(
-  a: { id: string; color: string | null; size: string | null },
-  b: { id: string; color: string | null; size: string | null }
-) {
-  return a.id === b.id && a.color === b.color && a.size === b.size;
+type LineKey = {
+  id: string;
+  color: string | null;
+  size: string | null;
+  option?: string | null;
+};
+
+// Carts saved before v18 have no "option" field, so treat missing as null.
+function sameLine(a: LineKey, b: LineKey) {
+  return (
+    a.id === b.id &&
+    a.color === b.color &&
+    a.size === b.size &&
+    (a.option ?? null) === (b.option ?? null)
+  );
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -77,23 +95,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  function removeItem(id: string, color: string | null, size: string | null) {
-    setItems((prev) => prev.filter((i) => !sameLine(i, { id, color, size })));
+  function removeItem(
+    id: string,
+    color: string | null,
+    size: string | null,
+    option: string | null
+  ) {
+    setItems((prev) =>
+      prev.filter((i) => !sameLine(i, { id, color, size, option }))
+    );
   }
 
   function updateQuantity(
     id: string,
     color: string | null,
     size: string | null,
+    option: string | null,
     quantity: number
   ) {
     if (quantity <= 0) {
-      removeItem(id, color, size);
+      removeItem(id, color, size, option);
       return;
     }
     setItems((prev) =>
       prev.map((i) =>
-        sameLine(i, { id, color, size }) ? { ...i, quantity } : i
+        sameLine(i, { id, color, size, option }) ? { ...i, quantity } : i
       )
     );
   }

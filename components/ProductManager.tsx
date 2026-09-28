@@ -18,6 +18,7 @@ function makeEmptyForm(defaultCategory: string) {
     availability: "in_stock" as "in_stock" | "by_order",
     student_only: false,
     discount_amount: "" as string,
+    price_options: [] as { label: string; price: string }[],
   };
 }
 
@@ -55,11 +56,42 @@ export default function ProductManager({
       student_only: p.student_only ?? false,
       discount_amount:
         p.discount_amount != null ? String(p.discount_amount) : "",
+      price_options: (p.price_options ?? []).map((o) => ({
+        label: o.label,
+        price: String(o.price),
+      })),
     });
   }
 
   function resetForm() {
     setForm(makeEmptyForm(categories[0] ?? ""));
+  }
+
+  function addPriceOption() {
+    setForm((f) => ({
+      ...f,
+      price_options: [...f.price_options, { label: "", price: "" }],
+    }));
+  }
+
+  function updatePriceOption(
+    index: number,
+    field: "label" | "price",
+    value: string
+  ) {
+    setForm((f) => ({
+      ...f,
+      price_options: f.price_options.map((o, i) =>
+        i === index ? { ...o, [field]: value } : o
+      ),
+    }));
+  }
+
+  function removePriceOption(index: number) {
+    setForm((f) => ({
+      ...f,
+      price_options: f.price_options.filter((_, i) => i !== index),
+    }));
   }
 
   function addColor() {
@@ -133,13 +165,46 @@ export default function ProductManager({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
     setError(null);
+
+    // Price options: none, or at least two. Each needs a name and a price,
+    // and names can't repeat (the cart tells lines apart by name).
+    const cleanOptions = form.price_options.map((o) => ({
+      label: o.label.trim(),
+      price: Number(o.price),
+    }));
+    if (cleanOptions.length === 1) {
+      setError("Add at least 2 price options, or remove the one you added.");
+      return;
+    }
+    if (
+      cleanOptions.some(
+        (o) => !o.label || Number.isNaN(o.price) || o.price < 0
+      )
+    ) {
+      setError("Every price option needs a name and a valid price.");
+      return;
+    }
+    const labels = cleanOptions.map((o) => o.label.toLowerCase());
+    if (new Set(labels).size !== labels.length) {
+      setError("Price option names must be different from each other.");
+      return;
+    }
+
+    setSaving(true);
+
+    // With options, the main price is kept equal to the cheapest option so
+    // search, sorting and the "From P…" label all stay correct.
+    const mainPrice =
+      cleanOptions.length > 0
+        ? Math.min(...cleanOptions.map((o) => o.price))
+        : Number(form.price);
 
     const payload = {
       name: form.name,
       description: form.description,
-      price: Number(form.price),
+      price: mainPrice,
+      price_options: cleanOptions,
       category: form.category,
       image_url: form.image_url || form.images[0] || null,
       images: form.images,
@@ -203,26 +268,6 @@ export default function ProductManager({
     setProducts((prev) => prev.filter((p) => p.id !== id));
   }
 
-  async function handleToggleHidden(p: Product) {
-    const nextHidden = !p.is_hidden;
-    const { data, error: updateError } = await supabase
-      .from("products")
-      .update({ is_hidden: nextHidden })
-      .eq("id", p.id)
-      .select()
-      .single();
-
-    if (updateError) {
-      setError(updateError.message);
-      return;
-    }
-    if (data) {
-      setProducts((prev) =>
-        prev.map((row) => (row.id === data.id ? (data as Product) : row))
-      );
-    }
-  }
-
   return (
     <div className="mt-6 grid gap-8 md:grid-cols-[1fr_360px]">
       <div className="space-y-3">
@@ -232,10 +277,7 @@ export default function ProductManager({
         {products.map((p) => (
           <div
             key={p.id}
-            className={
-              "card flex items-center gap-4 rounded-lg p-3 " +
-              (p.is_hidden ? "opacity-50" : "")
-            }
+            className="card flex items-center gap-4 rounded-lg p-3"
           >
             <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded bg-bg">
               {p.image_url && (
@@ -250,11 +292,6 @@ export default function ProductManager({
             <div className="flex-1">
               <p className="font-medium">
                 {p.name}
-                {p.is_hidden && (
-                  <span className="ml-2 rounded-full border border-red-400 px-2 py-0.5 text-[10px] font-semibold uppercase text-red-400">
-                    Hidden
-                  </span>
-                )}
                 {p.student_only && (
                   <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-bg">
                     Student
@@ -267,16 +304,12 @@ export default function ProductManager({
                 )}
               </p>
               <p className="text-sm text-muted">
-                {p.category} — P{Number(p.price).toFixed(2)} —{" "}
+                {p.category} —{" "}
+                {(p.price_options?.length ?? 0) > 1 ? "From " : ""}P
+                {Number(p.price).toFixed(2)} —{" "}
                 {p.availability === "in_stock" ? "Readily Available" : "By order"}
               </p>
             </div>
-            <button
-              onClick={() => handleToggleHidden(p)}
-              className="text-sm text-muted hover:text-text"
-            >
-              {p.is_hidden ? "Unhide" : "Hide"}
-            </button>
             <button
               onClick={() => startEdit(p)}
               className="text-sm text-accent"
@@ -318,14 +351,62 @@ export default function ProductManager({
 
         <label className="mt-3 block text-sm text-muted">Price (BWP)</label>
         <input
-          required
+          required={form.price_options.length === 0}
+          disabled={form.price_options.length > 0}
           type="number"
           step="0.01"
           min="0"
           value={form.price}
           onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2"
+          className="mt-1 w-full rounded border border-border bg-surface px-3 py-2 disabled:opacity-50"
         />
+
+        <div className="mt-4 rounded border border-border p-3">
+          <p className="text-sm text-muted">
+            Price options (optional, for example Basic box / Premium box)
+          </p>
+          {form.price_options.length > 0 && (
+            <p className="mt-1 text-xs text-muted">
+              The main price above is switched off while options exist. The
+              cheapest option is used as the &quot;From&quot; price.
+            </p>
+          )}
+          <div className="mt-2 space-y-2">
+            {form.price_options.map((o, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  value={o.label}
+                  onChange={(e) => updatePriceOption(i, "label", e.target.value)}
+                  placeholder="Name, e.g. Premium box"
+                  className="min-w-0 flex-1 rounded border border-border bg-surface px-2 py-1.5 text-sm"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={o.price}
+                  onChange={(e) => updatePriceOption(i, "price", e.target.value)}
+                  placeholder="Price"
+                  className="w-24 rounded border border-border bg-surface px-2 py-1.5 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => removePriceOption(i)}
+                  className="text-sm text-red-400"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addPriceOption}
+            className="mt-2 text-sm text-accent"
+          >
+            + Add price option
+          </button>
+        </div>
 
         <label className="mt-3 block text-sm text-muted">
           Student discount (P off, optional)

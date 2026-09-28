@@ -1,9 +1,11 @@
 import type { CartItem } from "@/lib/cart-context";
 
 function itemLine(i: CartItem) {
-  const variantParts = [i.color, i.size ? `Size ${i.size}` : null].filter(
-    Boolean
-  );
+  const variantParts = [
+    i.option,
+    i.color,
+    i.size ? `Size ${i.size}` : null,
+  ].filter(Boolean);
   const variant = variantParts.length ? ` (${variantParts.join(", ")})` : "";
   const status =
     i.availability === "by_order" ? "Available by order" : "Readily available";
@@ -24,7 +26,10 @@ export function buildWhatsAppOrderLink(
   whatsappNumber: string,
   items: CartItem[],
   total: number,
-  customerName: string
+  customerName: string,
+  deposit: number,
+  balance: number,
+  depositPercent: number
 ) {
   const lines = [
     `Hi, I'd like to order from The Collector.`,
@@ -34,8 +39,10 @@ export function buildWhatsAppOrderLink(
     ...items.map((i) => itemLine(i)),
     "",
     `Total: P${total.toFixed(2)}`,
+    `Deposit (${depositPercent}%): P${deposit.toFixed(2)}`,
+    `Balance: P${balance.toFixed(2)}`,
     "",
-    "I'd like to arrange a deposit/payment.",
+    "I'd like to arrange my deposit.",
   ];
 
   const message = encodeURIComponent(lines.join("\n"));

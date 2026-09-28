@@ -9,7 +9,10 @@ export default async function CartPage() {
   return (
     <>
       <Header />
-      <CartView whatsappNumber={settings.whatsapp_number} />
+      <CartView
+        whatsappNumber={settings.whatsapp_number}
+        depositPercent={settings.deposit_percent}
+      />
       <Footer />
     </>
   );

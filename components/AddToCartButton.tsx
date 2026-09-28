@@ -7,10 +7,13 @@ import type { Product } from "@/components/ProductCard";
 export default function AddToCartButton({
   product,
   effectivePrice,
+  option,
   selectedImageUrl,
 }: {
   product: Product;
   effectivePrice?: number;
+  /** Label of the price option the customer chose, if the product has any. */
+  option?: string | null;
   /** The photo the customer picked in the gallery, if any. Falls back to
    *  the product's cover image. */
   selectedImageUrl?: string | null;
@@ -38,6 +41,7 @@ export default function AddToCartButton({
       image_url: selectedImageUrl ?? product.image_url,
       color: selectedColor,
       size: selectedSize,
+      option: option ?? null,
       availability: product.availability,
     });
     setAdded(true);
