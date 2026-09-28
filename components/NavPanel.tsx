@@ -57,7 +57,7 @@ export default function NavPanel() {
             )}
           </Link>
           <Link
-            href="/shop"
+            href="/catalogs"
             onClick={() => setOpen(false)}
             className="rounded px-2 py-3 text-text hover:bg-bg"
           >

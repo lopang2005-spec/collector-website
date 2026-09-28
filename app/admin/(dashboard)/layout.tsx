@@ -23,6 +23,9 @@ export default function AdminLayout({
             <Link href="/admin/categories" className="text-sm text-muted hover:text-text">
               Categories
             </Link>
+            <Link href="/admin/catalogs" className="text-sm text-muted hover:text-text">
+              Catalog Buttons
+            </Link>
             <Link href="/admin/orders" className="text-sm text-muted hover:text-text">
               Orders
             </Link>

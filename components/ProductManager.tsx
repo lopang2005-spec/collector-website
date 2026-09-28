@@ -17,6 +17,7 @@ function makeEmptyForm(defaultCategory: string) {
     sizes: [] as string[],
     availability: "in_stock" as "in_stock" | "by_order",
     student_only: false,
+    hidden: false,
     discount_amount: "" as string,
     price_options: [] as { label: string; price: string }[],
   };
@@ -54,6 +55,7 @@ export default function ProductManager({
       sizes: p.sizes ?? [],
       availability: p.availability ?? "in_stock",
       student_only: p.student_only ?? false,
+      hidden: p.hidden ?? false,
       discount_amount:
         p.discount_amount != null ? String(p.discount_amount) : "",
       price_options: (p.price_options ?? []).map((o) => ({
@@ -212,6 +214,7 @@ export default function ProductManager({
       sizes: form.sizes,
       availability: form.availability,
       student_only: form.student_only,
+      hidden: form.hidden,
       discount_amount:
         form.discount_amount.trim() === ""
           ? null
@@ -295,6 +298,11 @@ export default function ProductManager({
                 {p.student_only && (
                   <span className="ml-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-bg">
                     Student
+                  </span>
+                )}
+                {p.hidden && (
+                  <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold uppercase text-muted">
+                    Hidden
                   </span>
                 )}
                 {Number(p.discount_amount) > 0 && (
@@ -394,7 +402,7 @@ export default function ProductManager({
                   onClick={() => removePriceOption(i)}
                   className="text-sm text-red-400"
                 >
-                  ✕
+                  Remove
                 </button>
               </div>
             ))}
@@ -496,6 +504,24 @@ export default function ProductManager({
             <span className="block text-xs text-muted">
               Only shows in the student catalog, hidden from the main shop.
               Verified students unlock it at /student.
+            </span>
+          </span>
+        </label>
+
+        <label className="mt-3 flex cursor-pointer items-start gap-3 rounded border border-border p-3">
+          <input
+            type="checkbox"
+            checked={form.hidden}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, hidden: e.target.checked }))
+            }
+            className="mt-1"
+          />
+          <span>
+            <span className="block text-sm font-medium">Hide from store</span>
+            <span className="block text-xs text-muted">
+              Removes this product from every customer page, including the
+              catalogs and search. You can still edit it here.
             </span>
           </span>
         </label>

@@ -42,7 +42,7 @@ export default function Hero({ settings }: { settings: SiteSettings }) {
 
         <div className="mt-9 flex flex-col items-center gap-4 sm:flex-row">
           <Link
-            href="/shop"
+            href="/catalogs"
             className="rounded-full bg-accent px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.15em] text-bg transition hover:opacity-90"
           >
             {settings.hero_button_text}

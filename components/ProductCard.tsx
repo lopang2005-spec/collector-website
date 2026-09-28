@@ -17,6 +17,7 @@ export type Product = {
   student_only?: boolean;
   discount_amount?: number | null;
   price_options?: PriceOption[] | null;
+  hidden?: boolean;
 };
 
 export default function ProductCard({
